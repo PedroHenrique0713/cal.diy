@@ -51,6 +51,14 @@ describe("sanitizeValue", () => {
     expect(sanitizeValue("=1\n+2")).toBe('"\'=1\n+2"');
   });
 
+  it("prefixes values that start with a tab, carriage return or line feed", () => {
+    // Spreadsheets can skip leading whitespace before looking for a formula,
+    // so OWASP lists these alongside =, +, - and @.
+    expect(sanitizeValue("\t=1+1")).toBe("'\t=1+1");
+    expect(sanitizeValue("\r=1+1")).toBe('"\'\r=1+1"');
+    expect(sanitizeValue("\n=1+1")).toBe('"\'\n=1+1"');
+  });
+
   it("does not prefix non-formula values", () => {
     expect(sanitizeValue("hello")).toBe("hello");
     expect(sanitizeValue("123")).toBe("123");

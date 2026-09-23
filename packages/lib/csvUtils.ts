@@ -48,12 +48,14 @@ export const objectsToCsv = (data: Record<string, any>[]): string => {
 
 export const sanitizeValue = (value: string) => {
   // Protect against formula injection (OWASP). Values starting with =, +, -, @
-  // are interpreted as formulas by Excel/Sheets. Prefix with a single quote to
-  // force text rendering, which is invisible in most spreadsheet apps.
+  // are interpreted as formulas by Excel/Sheets, and so are values starting with
+  // a tab, CR or LF, which spreadsheets may skip before looking for a formula.
+  // Prefix with a single quote to force text rendering, which is invisible in
+  // most spreadsheet apps.
   // This runs before quoting: quoting is a CSV delimiter, not an escape the
   // spreadsheet honours, so a formula that also contains a comma would come
   // back merely quoted and still be evaluated.
-  const sanitized = /^[=+\-@]/.test(value) ? `'${value}` : value;
+  const sanitized = /^[=+\-@\t\r\n]/.test(value) ? `'${value}` : value;
 
   // handling three cases:
   // 1. quotes - we need to double quotes for CSV
